@@ -3,26 +3,25 @@ package task
 import (
 	"fmt"
 	"github.com/kube-sailmaker/template-gen/functions"
-	"github.com/kube-sailmaker/template-gen/model"
 )
 
 const (
-	infraManifest    = "%s/provider/infrastructure/%s.yaml"
-	mixinManifest    = "%s/provider/mixins/%s.yaml"
-	resourceManifest = "%s/provider/resources/%s.yaml"
+	infraManifest    = "%s/infrastructure/%s.yaml"
+	mixinManifest    = "%s/mixins/%s.yaml"
+	resourceManifest = "%s/resources/%s.yaml"
 )
 
-func GetInfrastructure(name string, t interface{}, args *model.Args) {
-	file := fmt.Sprintf(infraManifest, args.ManifestDir, name)
+func GetInfrastructure(name string, t interface{}, resourceDir string) {
+	file := fmt.Sprintf(infraManifest, resourceDir, name)
 	functions.UnmarshalFile(file, t)
 }
 
-func GetMixin(name string, t interface{}, args *model.Args) {
-	file := fmt.Sprintf(mixinManifest, args.ManifestDir, name)
+func GetMixin(name string, t interface{}, resourceDir string) {
+	file := fmt.Sprintf(mixinManifest, resourceDir, name)
 	functions.UnmarshalFile(file, t)
 }
 
-func GetResource(name string, t interface{}, args *model.Args) {
-	file := fmt.Sprintf(resourceManifest, args.ManifestDir, name)
+func GetResource(name string, t interface{}, resourceDir string) {
+	file := fmt.Sprintf(resourceManifest, resourceDir, name)
 	functions.UnmarshalFile(file, t)
 }

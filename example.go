@@ -1,14 +1,5 @@
-### Template Generator
-Given a manifest folder path, it generate chart to deploy into K8s.
+package main
 
-#### Running Example App
-Load a configuration file with details from config.yml
-```
-go run example.go
-```
-
-### Quickstart
-```
 import (
 	"github.com/kube-sailmaker/template-gen/entry"
 	"github.com/kube-sailmaker/template-gen/model"
@@ -16,8 +7,18 @@ import (
 )
 
 func main() {
+	busybox := model.App{
+		Name:    "busybox",
+		Version: "latest",
+	}
+	nginx := model.App{
+		Name:    "nginx",
+		Version: "latest",
+	}
+
 	appList := make([]model.App, 0)
-	
+	appList = append(appList, busybox, nginx)
+
 	appSpec := model.AppSpec{
 		Namespace:   "apps",
 		ReleaseName: "Release-2",
@@ -31,12 +32,3 @@ func main() {
 
 	entry.TemplateGenerator(&appSpec, appDir, resourceDir, outputDir)
 }
-```
-
-Based on the release manifest it generates the following for the each application listed in the release manifest
-
-```
-- service
-- service-account
-- deployment
-```

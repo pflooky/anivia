@@ -34,28 +34,28 @@ var MEMORY = map[string]string{
 	"default": "500Mi",
 }
 
-func ProcessApplication(app *model.App, args *model.Args) *templates.Application {
-	appFile := fmt.Sprintf(appPath, args.ManifestDir, app.Name)
+func ProcessApplication(app *model.App, releaseName string, env string, appDir string, resourceDir string) *templates.Application {
+	appFile := fmt.Sprintf("%s/%s.yaml", appDir, app.Name)
 	application := &model.Application{}
 	functions.UnmarshalFile(appFile, application)
 
 	appValues := templates.Application{
 		Name:           app.Name,
 		Tag:            app.Version,
-		ReleaseName:    args.ReleaseName,
+		ReleaseName:    releaseName,
 		Annotations:    application.Annotations,
 		LivenessProbe:  application.LivenessProbe,
 		ReadinessProbe: application.ReadinessProbe,
 	}
 
-	GenerateEnvVars(application, args, &appValues)
-	GenerateResourceLimit(application, args, &appValues)
-	GenerateMixins(application, args, &appValues)
+	GenerateEnvVars(application, resourceDir, &appValues)
+	GenerateResourceLimit(application, env, &appValues)
+	GenerateMixins(application, resourceDir, &appValues)
 
 	return &appValues
 }
 
-func GenerateMixins(application *model.Application, args *model.Args, appValues *templates.Application) {
+func GenerateMixins(application *model.Application, resourceDir string, appValues *templates.Application) {
 	appValues.Command = make([]string, 0)
 	appValues.Entrypoint = make([]string, 0)
 	for _, mxin := range application.Mixins {
@@ -63,7 +63,7 @@ func GenerateMixins(application *model.Application, args *model.Args, appValues 
 		name := mixinType[0]
 		mType := mixinType[1]
 		mixinList := model.MixinList{}
-		GetMixin(name, &mixinList, args)
+		GetMixin(name, &mixinList, resourceDir)
 		for _, m := range mixinList.Mixin {
 			if mType == m.Name {
 				for k, v := range m.Env {
@@ -76,12 +76,12 @@ func GenerateMixins(application *model.Application, args *model.Args, appValues 
 	}
 }
 
-func GenerateResourceLimit(application *model.Application, args *model.Args, appValues *templates.Application) {
+func GenerateResourceLimit(application *model.Application, environment string, appValues *templates.Application) {
 	appValues.Limits = make(map[string]string, 0)
 	//Process app template
 	for _, tmpl := range application.Template {
 		env := tmpl.Name
-		if env == args.Env {
+		if env == environment {
 			configs := tmpl.Config
 			cpuLimit := CPU["default"]
 			if val, ok := configs[cpu]; ok {
@@ -103,7 +103,7 @@ func GenerateResourceLimit(application *model.Application, args *model.Args, app
 	}
 }
 
-func GenerateEnvVars(application *model.Application, args *model.Args, appValues *templates.Application) {
+func GenerateEnvVars(application *model.Application, resourceDir string, appValues *templates.Application) {
 	appEnvVars := make(map[string]string, 0)
 
 	//Process app resources
@@ -114,7 +114,7 @@ func GenerateEnvVars(application *model.Application, args *model.Args, appValues
 		name := resDetails[0]
 		envType := resDetails[1]
 		resource := &model.Resource{}
-		GetResource(name, &resource, args)
+		GetResource(name, &resource, resourceDir)
 		for _, resTemplate := range resource.Spec.ResourceTemplate {
 			//Only using the context
 			if resTemplate.Name == envType {
@@ -127,7 +127,7 @@ func GenerateEnvVars(application *model.Application, args *model.Args, appValues
 					infraName := infra[0]
 					infraEnv := infra[1]
 					infrastructure := &model.Infrastructure{}
-					GetInfrastructure(infraName, &infrastructure, args)
+					GetInfrastructure(infraName, &infrastructure, resourceDir)
 					for _, infraTemplate := range infrastructure.Spec.Template {
 						if infraEnv == infraTemplate.Name {
 							addToEnvVars(name, appEnvVars, infraTemplate.Attributes)

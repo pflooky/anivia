@@ -1,42 +1,41 @@
 #appname, probes
-name: aksu
-liveness_probe: /app/health
-readiness_probe: /app/health
+name: nginx
+liveness_probe: /health
+readiness_probe: /health
 
 #version, artifact id will be added by deployer
 annotations:
-  lang: node
+  lang: java
   artifact_type: microservice
-  framework: node
+  framework: springboot
   owner: team1/person
   email: team/person email
 
-resources:
-  - elasticsearch-account/test
-
+resources: []
+  
+#service account, env from resources, configmap from vault, file-password, auto injected  
 capabilities:
   - prometheus
   - vault
   - file-password
   - read-kubernetes
 
-mixins:
- - node/node-microservices
+mixins: []
 
 template:
 - name: test
   config:
-    cpu: c1
-    memory: m2
-    logging_level: LOG
-
+    cpu: c05
+    memory: m1
+    logging_level: DEBUG
+    
 - name: lab
-  configs:
+  config:
     cpu: c1
     memory: m2
 
 - name: prod
-  configs:
+  config:
     replicas: 2
     cpu: c3
     memory: m3
