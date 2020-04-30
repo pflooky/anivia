@@ -4,29 +4,42 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 )
 
-func Run(releaseTemplate *ReleaseTemplate, outputDir string) {
+func createDirSafely(fileName string) error {
+	dirName := filepath.Dir(fileName)
+	if _, serr := os.Stat(dirName); serr != nil {
+		merr := os.MkdirAll(dirName, os.ModePerm)
+		if merr != nil {
+			return merr
+		}
+	}
+	return nil
+}
+
+func Run(releaseTemplate *ReleaseTemplate, outputDir string) error {
 	tmplArray := []string{"ServiceTemplate", "DeploymentTemplate", "ServiceAccountTemplate"}
-	os.MkdirAll(outputDir, os.ModePerm)
 	for _, application := range releaseTemplate.Application {
-		os.Chdir(outputDir)
-		os.Mkdir(application.Name, os.ModePerm)
-		os.Chdir(application.Name)
-		fmt.Println("Generating template for: ", application.Name)
+		appWorkDir := fmt.Sprintf("%s/%s/", outputDir, application.Name)
+		cerr := createDirSafely(appWorkDir)
+		if cerr != nil {
+			return cerr
+		}
+		log.Println("Generating template for: ", application.Name)
 		for _, tName := range tmplArray {
 			tmpl := LoadTemplates(tName, &application)
-
-			file, er := os.Create(tmpl.Name())
+			file, er := os.Create(fmt.Sprintf("%s/%s", appWorkDir, tmpl.Name()))
 			if er != nil {
-				log.Fatal("error ", er)
+				return er
 			}
 
 			err := tmpl.Execute(file, &application)
 			if err != nil {
-				log.Fatal("error ", err)
+				return err
 			}
 		}
 	}
+	return nil
 
 }
