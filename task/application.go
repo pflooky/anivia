@@ -1,6 +1,7 @@
 package task
 
 import (
+	"errors"
 	"fmt"
 	"github.com/kube-sailmaker/template-gen/functions"
 	"github.com/kube-sailmaker/template-gen/model"
@@ -34,7 +35,10 @@ var MEMORY = map[string]string{
 	"default": "500Mi",
 }
 
-func ProcessApplication(app *model.App, releaseName string, env string, appDir string, resourceDir string) *templates.Application {
+func ProcessApplication(app *model.App, releaseName string, env string, appDir string, resourceDir string) (*templates.Application, error) {
+	if app == nil {
+		return nil, errors.New("app specification cannot be nil")
+	}
 	appFile := fmt.Sprintf("%s/%s.yaml", appDir, app.Name)
 	application := &model.Application{}
 	functions.UnmarshalFile(appFile, application)
@@ -52,7 +56,7 @@ func ProcessApplication(app *model.App, releaseName string, env string, appDir s
 	GenerateResourceLimit(application, env, &appValues)
 	GenerateMixins(application, resourceDir, &appValues)
 
-	return &appValues
+	return &appValues, nil
 }
 
 func GenerateMixins(application *model.Application, resourceDir string, appValues *templates.Application) {

@@ -23,7 +23,7 @@ func main() {
 		Namespace:   "apps",
 		ReleaseName: "Release-2",
 		Environment: "test",
-		App:         appList,
+		Apps:         appList,
 	}
 	path, _ := os.Getwd()
 	appDir := path + "/sample-manifest/user/apps"
