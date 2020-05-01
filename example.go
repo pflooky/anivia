@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/kube-sailmaker/template-gen/entry"
 	"github.com/kube-sailmaker/template-gen/model"
 	"os"
@@ -8,7 +9,7 @@ import (
 
 func main() {
 	busybox := model.App{
-		Name:    "busybox",
+		Name:    "adimono",
 		Version: "latest",
 	}
 	nginx := model.App{
@@ -23,12 +24,15 @@ func main() {
 		Namespace:   "apps",
 		ReleaseName: "Release-2",
 		Environment: "test",
-		Apps:         appList,
+		Apps:        appList,
 	}
 	path, _ := os.Getwd()
 	appDir := path + "/sample-manifest/user/apps"
 	resourceDir := path + "/sample-manifest/provider"
 	outputDir := path + "/tmp"
 
-	entry.TemplateGenerator(&appSpec, appDir, resourceDir, outputDir)
+	err := entry.TemplateGenerator(&appSpec, appDir, resourceDir, outputDir)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

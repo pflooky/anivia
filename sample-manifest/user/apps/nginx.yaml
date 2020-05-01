@@ -28,7 +28,7 @@ template:
     cpu: c05
     memory: m1
     logging_level: DEBUG
-    
+
 - name: lab
   config:
     cpu: c1

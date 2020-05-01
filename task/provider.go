@@ -11,17 +11,17 @@ const (
 	resourceManifest = "%s/resources/%s.yaml"
 )
 
-func GetInfrastructure(name string, t interface{}, resourceDir string) {
+func GetInfrastructure(name string, t interface{}, resourceDir string) error {
 	file := fmt.Sprintf(infraManifest, resourceDir, name)
-	functions.UnmarshalFile(file, t)
+	return functions.UnmarshalFile(file, t)
 }
 
-func GetMixin(name string, t interface{}, resourceDir string) {
+func GetMixin(name string, t interface{}, resourceDir string) error {
 	file := fmt.Sprintf(mixinManifest, resourceDir, name)
-	functions.UnmarshalFile(file, t)
+	return functions.UnmarshalFile(file, t)
 }
 
-func GetResource(name string, t interface{}, resourceDir string) {
+func GetResource(name string, t interface{}, resourceDir string) error {
 	file := fmt.Sprintf(resourceManifest, resourceDir, name)
-	functions.UnmarshalFile(file, t)
+	return functions.UnmarshalFile(file, t)
 }

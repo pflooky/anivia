@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -28,15 +29,18 @@ func Run(releaseTemplate *ReleaseTemplate, outputDir string) error {
 		}
 		log.Println("Generating template for: ", application.Name)
 		for _, tName := range tmplArray {
-			tmpl := LoadTemplates(tName, &application)
+			tmpl, err := LoadTemplates(tName, &application)
+			if err != nil {
+				return errors.New(fmt.Sprintf("[app]: %s, [error]: %v", application.Name, err))
+			}
 			file, er := os.Create(fmt.Sprintf("%s/%s", appWorkDir, tmpl.Name()))
 			if er != nil {
 				return er
 			}
 
-			err := tmpl.Execute(file, &application)
-			if err != nil {
-				return err
+			exErr := tmpl.Execute(file, &application)
+			if exErr != nil {
+				return errors.New(fmt.Sprintf("[app]: %s, [error]: %v", application.Name, err))
 			}
 		}
 	}

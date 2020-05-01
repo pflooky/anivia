@@ -24,6 +24,5 @@ func TemplateGenerator(appSpec *model.AppSpec, appDir string, resourceDir string
 	}
 
 	releaseTemplate := templates.ReleaseTemplate{Application: appTemplate}
-	templates.Run(&releaseTemplate, outputDir)
-	return nil
+	return templates.Run(&releaseTemplate, outputDir)
 }

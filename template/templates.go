@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"text/template"
@@ -104,7 +105,7 @@ spec:
 `
 
 //LoadTemplates parse static template to helm chart
-func LoadTemplates(tName string, app *Application) *template.Template {
+func LoadTemplates(tName string, app *Application) (*template.Template, error) {
 	switch tName {
 	case "ChartTemplate":
 		return getTemplate("Chart.yaml", ChartTemplate)
@@ -115,18 +116,18 @@ func LoadTemplates(tName string, app *Application) *template.Template {
 	case "ServiceAccountTemplate":
 		return getTemplate(fmt.Sprintf("%s-serviceaccount.yaml", app.Name), ServiceAccountTemplate)
 	}
-	return nil
+	return nil, nil
 }
 
-func getTemplate(name string, serviceTemplate string) *template.Template {
+func getTemplate(name string, templateType string) (*template.Template, error) {
 	funcMap := template.FuncMap{
 		"ToUpper": strings.ToUpper,
 		"ToLower": strings.ToLower,
 	}
 
-	tmpl, err := template.New(name).Funcs(funcMap).Parse(serviceTemplate)
+	tmpl, err := template.New(name).Funcs(funcMap).Parse(templateType)
 	if err != nil {
-		fmt.Println("Error parsing ", err)
+		return nil, errors.New(fmt.Sprintf("error parsing %v ", err))
 	}
-	return tmpl
+	return tmpl, nil
 }
