@@ -1,9 +1,10 @@
 package model
 
 type Resource struct {
-	Kind     string            `yaml:"kind"`
-	Metadata map[string]string `yaml:"metadata"`
-	Spec     ResourceSpec      `yaml:"spec"`
+	ApiVersion string            `yaml:"apiVersion"`
+	Kind       string            `yaml:"kind"`
+	Metadata   map[string]string `yaml:"metadata"`
+	Spec       ResourceSpec      `yaml:"spec"`
 }
 
 type ResourceSpec struct {
