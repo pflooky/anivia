@@ -3,6 +3,7 @@ package templates
 import (
 	"errors"
 	"fmt"
+	"github.com/kube-sailmaker/template-gen/model"
 	"log"
 	"os"
 	"path/filepath"
@@ -19,31 +20,42 @@ func createDirSafely(fileName string) error {
 	return nil
 }
 
-func Run(releaseTemplate *ReleaseTemplate, outputDir string) error {
+func Run(releaseTemplate *ReleaseTemplate, outputDir string) (*model.DeploymentItemSummary, error) {
 	tmplArray := []string{"ServiceTemplate", "DeploymentTemplate", "ServiceAccountTemplate"}
+	itemSummary := model.DeploymentItemSummary{}
+	items := make([]model.DeploymentItem, 0)
 	for _, application := range releaseTemplate.Application {
 		appWorkDir := fmt.Sprintf("%s/%s/", outputDir, application.Name)
 		cerr := createDirSafely(appWorkDir)
 		if cerr != nil {
-			return cerr
+			return nil, cerr
 		}
 		log.Println("Generating template for: ", application.Name)
 		for _, tName := range tmplArray {
 			tmpl, err := LoadTemplates(tName, &application)
 			if err != nil {
-				return errors.New(fmt.Sprintf("[app]: %s, [error]: %v", application.Name, err))
+				return nil, errors.New(fmt.Sprintf("[app]: %s, [error]: %v", application.Name, err))
 			}
 			file, er := os.Create(fmt.Sprintf("%s/%s", appWorkDir, tmpl.Name()))
 			if er != nil {
-				return er
+				return nil, er
 			}
 
 			exErr := tmpl.Execute(file, &application)
 			if exErr != nil {
-				return errors.New(fmt.Sprintf("[app]: %s, [error]: %v", application.Name, err))
+				return nil, errors.New(fmt.Sprintf("[app]: %s, [error]: %v", application.Name, err))
 			}
 		}
+		items = append(items, model.DeploymentItem{
+			Name: application.Name,
+			Kind: "deployment",
+			Path: appWorkDir,
+		})
 	}
-	return nil
+	itemSummary = model.DeploymentItemSummary{
+		Namespace: releaseTemplate.Namespace,
+		Items:     items,
+	}
+	return &itemSummary, nil
 
 }

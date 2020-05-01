@@ -6,19 +6,19 @@ import (
 	templates "github.com/kube-sailmaker/template-gen/template"
 )
 
-func TemplateGenerator(appSpec *model.AppSpec, appDir string, resourceDir string, outputDir string) error {
+func TemplateGenerator(appSpec *model.AppSpec, appDir string, resourceDir string, outputDir string) (*model.DeploymentItemSummary, error) {
 	appTemplate := make([]templates.Application, 0)
 
 	validationErr := appSpec.Validate()
 	if validationErr != nil {
-		return validationErr
+		return nil, validationErr
 	}
 	appSpec.Normalise()
 
 	for _, app := range appSpec.Apps {
 		application, err := task.ProcessApplication(&app, appSpec.ReleaseName, appSpec.Environment, appDir, resourceDir)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		appTemplate = append(appTemplate, *application)
 	}

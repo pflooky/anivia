@@ -33,3 +33,14 @@ func (as *AppSpec) Normalise() {
 		as.ReleaseName = as.Namespace
 	}
 }
+
+type DeploymentItem struct {
+	Name string `json:"name"`
+	Kind string `json:"kind"`
+	Path string `json:"path"`
+}
+
+type DeploymentItemSummary struct {
+	Namespace string  `json:"namespace"`
+	Items     []DeploymentItem  `json:"items"`
+}

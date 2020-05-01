@@ -31,8 +31,12 @@ func main() {
 	resourceDir := path + "/sample-manifest/provider"
 	outputDir := path + "/tmp"
 
-	err := entry.TemplateGenerator(&appSpec, appDir, resourceDir, outputDir)
+	data, err := entry.TemplateGenerator(&appSpec, appDir, resourceDir, outputDir)
 	if err != nil {
 		fmt.Println(err)
+	}
+	fmt.Println("Generation Summary:")
+	for _, d := range data.Items {
+		fmt.Printf("Name: %s, Kind: %s, Path: %s\n", d.Name, d.Kind, d.Path)
 	}
 }
