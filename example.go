@@ -9,7 +9,7 @@ import (
 
 func main() {
 	busybox := model.App{
-		Name:    "adimono",
+		Name:    "busybox",
 		Version: "latest",
 	}
 	nginx := model.App{
