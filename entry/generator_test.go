@@ -10,14 +10,14 @@ import (
 
 func TestTemplateGeneratorThrowsErrorForMissingParams(t *testing.T) {
 	appSpec := model.AppSpec{}
-	err := TemplateGenerator(&appSpec, "", "", "")
+	_, err := TemplateGenerator(&appSpec, "", "", "")
 	test.NotNull(t, err)
 	test.EqualTo(t, "namespace is required", fmt.Sprintf("%v", err))
 }
 
 func TestTemplateGeneratorWithEmptyReleaseName(t *testing.T) {
 	spec := MockSpec()
-	err := TemplateGenerator(spec, "test", "test", "test")
+	_, err := TemplateGenerator(spec, "test", "test", "test")
 	test.NotNull(t, err)
 	test.EqualTo(t, "app to deploy cannot be empty", fmt.Sprintf("%v", err))
 }
@@ -29,11 +29,14 @@ func TestTemplateGenerator(t *testing.T) {
 	appSpec := GetAppSpec()
 	appDir := "../sample-manifest/user/apps"
 	resourceDir := "../sample-manifest/provider"
-	err := TemplateGenerator(appSpec, appDir, resourceDir, outputDir)
+	summary, err := TemplateGenerator(appSpec, appDir, resourceDir, outputDir)
 	test.Null(t, err)
 
 	stat, err := os.Stat("../tmp/busybox")
 	test.Null(t, err)
+	test.NotNull(t, summary)
+	test.EqualTo(t, "apps", summary.Namespace)
+	test.EqualTo(t, 1, len(summary.Items))
 	test.EqualTo(t, true, stat.IsDir())
 	os.RemoveAll(outputDir)
 }

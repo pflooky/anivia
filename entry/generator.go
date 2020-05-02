@@ -23,6 +23,9 @@ func TemplateGenerator(appSpec *model.AppSpec, appDir string, resourceDir string
 		appTemplate = append(appTemplate, *application)
 	}
 
-	releaseTemplate := templates.ReleaseTemplate{Application: appTemplate}
+	releaseTemplate := templates.ReleaseTemplate{
+		Namespace:   appSpec.Namespace,
+		Application: appTemplate,
+	}
 	return templates.Run(&releaseTemplate, outputDir)
 }
