@@ -1,0 +1,22 @@
+name: adimono
+namespace: apps::account
+params:
+  - name: APP_VER
+    default-value: "1.0"
+    description: "$projectName tag version to create"
+  - name: APP_NAME
+    default-value: $projectName
+    description: "Docker image name for $projectName"
+repo:
+  path: projects/apps.git
+stage:
+  - description: "Legacy Deployment"
+    type: helm
+    args:
+      release: "${APP_NAME}"
+      namespace: account
+      set: "image.tag=${APP_VER}"
+      #defaults, here for completeness
+      upgrade: true
+      workdir: "charts/$projectName"
+      values: "../../env/${env.DEPLOYMENT_ENV}.yaml,env/${env.DEPLOYMENT_ENV}.yaml"

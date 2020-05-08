@@ -3,40 +3,17 @@ package main
 import (
 	"fmt"
 	"github.com/kube-sailmaker/template-gen/entry"
-	"github.com/kube-sailmaker/template-gen/model"
 	"os"
 )
 
 func main() {
-	busybox := model.App{
-		Name:    "busybox",
-		Version: "latest",
-	}
-	nginx := model.App{
-		Name:    "nginx",
-		Version: "latest",
-	}
-
-	appList := make([]model.App, 0)
-	appList = append(appList, busybox, nginx)
-
-	appSpec := model.AppSpec{
-		Namespace:   "apps",
-		ReleaseName: "Release-2",
-		Environment: "test",
-		Apps:        appList,
-	}
 	path, _ := os.Getwd()
-	appDir := path + "/sample-manifest/user/apps"
-	resourceDir := path + "/sample-manifest/provider"
-	outputDir := path + "/tmp"
+	outputDir := path + "\\generated"
+	buildDir := path + "\\sample\\build"
 
-	data, err := entry.TemplateGenerator(&appSpec, appDir, resourceDir, outputDir)
+	//192.168.99.100
+	err := entry.TemplateGenerator(buildDir, outputDir)
 	if err != nil {
 		fmt.Println(err)
-	}
-	fmt.Println("Generation Summary:")
-	for _, d := range data.Items {
-		fmt.Printf("Name: %s, Kind: %s, Path: %s\n", d.Name, d.Kind, d.Path)
 	}
 }

@@ -1,0 +1,23 @@
+name: adimono
+namespace: apps::account
+params:
+  - name: APP_VER
+    default-value: "v0.0.1"
+    description: "Version Tag for artifact"
+repo:
+  path: projects/adimono.git
+build:
+  lang: java
+  step:
+    - type: gradlew
+      args:
+        jdk: "11"
+        tasks: "clean build"
+    - description: Image Build and Push
+      type: docker
+#a quality build will be setup such that sonarqube is run at a certain frequency
+quality:
+  enabled: true
+#a security  build will be setup such that something like fortify, aqua will run for this project
+security:
+  enabled: true

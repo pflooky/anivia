@@ -1,31 +1,22 @@
 package entry
 
 import (
-	"github.com/kube-sailmaker/template-gen/model"
 	"github.com/kube-sailmaker/template-gen/task"
 	templates "github.com/kube-sailmaker/template-gen/template"
+	"log"
 )
 
-func TemplateGenerator(appSpec *model.AppSpec, appDir string, resourceDir string, outputDir string) (*model.DeploymentItemSummary, error) {
-	appTemplate := make([]templates.Application, 0)
-
-	validationErr := appSpec.Validate()
-	if validationErr != nil {
-		return nil, validationErr
-	}
-	appSpec.Normalise()
-
-	for _, app := range appSpec.Apps {
-		application, err := task.ProcessApplication(&app, appSpec.ReleaseName, appSpec.Environment, appDir, resourceDir)
-		if err != nil {
-			return nil, err
-		}
-		appTemplate = append(appTemplate, *application)
+func TemplateGenerator(buildDir string, outputDir string) error {
+	log.Println("Generating build templates found in " + buildDir)
+	buildSpecs, buildErr := task.GenerateBuildSpecs(buildDir)
+	if buildErr != nil {
+		return buildErr
 	}
 
-	releaseTemplate := templates.ReleaseTemplate{
-		Namespace:   appSpec.Namespace,
-		Application: appTemplate,
+	err := templates.RunTemplates(&buildSpecs, outputDir)
+	if err != nil {
+		return err
 	}
-	return templates.Run(&releaseTemplate, outputDir)
+
+	return nil
 }

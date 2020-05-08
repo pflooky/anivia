@@ -20,42 +20,33 @@ func createDirSafely(fileName string) error {
 	return nil
 }
 
-func Run(releaseTemplate *ReleaseTemplate, outputDir string) (*model.DeploymentItemSummary, error) {
-	tmplArray := []string{"ServiceTemplate", "DeploymentTemplate", "ServiceAccountTemplate"}
-	itemSummary := model.DeploymentItemSummary{}
-	items := make([]model.DeploymentItem, 0)
-	for _, application := range releaseTemplate.Application {
-		appWorkDir := fmt.Sprintf("%s/%s/", outputDir, application.Name)
-		cerr := createDirSafely(appWorkDir)
-		if cerr != nil {
-			return nil, cerr
-		}
-		log.Println("Generating template for: ", application.Name)
+func RunTemplates(buildSpecs *[]model.BuildSpec, outputDir string) error {
+	tmplArray := []string{"jenkins-build-job", "build-script"}
+
+	for _, buildSpec := range *buildSpecs {
 		for _, tName := range tmplArray {
-			tmpl, err := LoadTemplates(tName, &application)
-			if err != nil {
-				return nil, errors.New(fmt.Sprintf("[app]: %s, [error]: %v", application.Name, err))
-			}
-			file, er := os.Create(fmt.Sprintf("%s/%s", appWorkDir, tmpl.Name()))
-			if er != nil {
-				return nil, er
+			log.Println(fmt.Sprintf("Generating %s template for: %s", tName, buildSpec.Name))
+			appWorkDir := fmt.Sprintf("%s\\build\\%s\\%s\\", outputDir, buildSpec.Name, tName)
+			appDirErr := createDirSafely(appWorkDir)
+			if appDirErr != nil {
+				return appDirErr
 			}
 
-			exErr := tmpl.Execute(file, &application)
+			tmpl, tmplErr := LoadTemplates(tName, &buildSpec)
+			if tmplErr != nil {
+				return errors.New(fmt.Sprintf("[app]: %s, [error]: %v", buildSpec.Name, tmplErr))
+			}
+			file, fileErr := os.Create(fmt.Sprintf("%s\\%s", appWorkDir, tmpl.Name()))
+			if fileErr != nil {
+				return fileErr
+			}
+
+			exErr := tmpl.Execute(file, &buildSpec)
 			if exErr != nil {
-				return nil, errors.New(fmt.Sprintf("[app]: %s, [error]: %v", application.Name, err))
+				return errors.New(fmt.Sprintf("[app]: %s, [error]: %v", buildSpec.Name, exErr))
 			}
 		}
-		items = append(items, model.DeploymentItem{
-			Name: application.Name,
-			Kind: "deployment",
-			Path: appWorkDir,
-		})
 	}
-	itemSummary = model.DeploymentItemSummary{
-		Namespace: releaseTemplate.Namespace,
-		Items:     items,
-	}
-	return &itemSummary, nil
 
+	return nil
 }

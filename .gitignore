@@ -7,3 +7,5 @@ TODO.md
 coverage.html
 go.sum
 vendor
+.gradle
+gradle
