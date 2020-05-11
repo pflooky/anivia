@@ -64,6 +64,29 @@ var QualityTemplate = `
 var SecurityTemplate = `
 `
 
+var VxPipelineTemplate = `NEXUS:
+	display_name: "Project Nexus"
+	updateExistingJobs: "on"
+	repositories:
+		{{ range $build := . }}"{{ $build.Name }}":
+			branches:
+				"{{ $build.Branches }}":
+					"{{ $build.View }}":
+						webhooks: "on"
+						filename: "{{ $build.Filename }}"
+						{{ if $build.Params }}parameters:{{range $param := $build.Params }}
+							- {{ $param.Type }}:
+								name: "{{ $param.Name }}"
+								default: "{{ $param.Default }}"
+								description: "{{ $param.Description }}"
+								{{ if eq $param.Type "choice" }}choices: {{ $param.Choices | ToChoices }}{{ end }}{{ end }}{{ end }}
+		{{ end }}
+`
+
+func LoadVxPipelineTemplate() (*template.Template, error) {
+	return getTemplate("NEXUS.yaml", VxPipelineTemplate)
+}
+
 //LoadTemplates parse static template to helm chart
 func LoadTemplates(tName string, app *model.BuildSpec) (*template.Template, error) {
 	switch tName {
@@ -81,9 +104,10 @@ func LoadTemplates(tName string, app *model.BuildSpec) (*template.Template, erro
 
 func getTemplate(name string, templateType string) (*template.Template, error) {
 	funcMap := template.FuncMap{
-		"ToUpper":  strings.ToUpper,
-		"ToLower":  strings.ToLower,
-		"ToFolder": ToFolder,
+		"ToUpper":   strings.ToUpper,
+		"ToLower":   strings.ToLower,
+		"ToFolder":  ToFolder,
+		"ToChoices": ToChoices,
 	}
 
 	tmpl, err := template.New(name).Funcs(funcMap).Parse(templateType)
@@ -95,4 +119,12 @@ func getTemplate(name string, templateType string) (*template.Template, error) {
 
 func ToFolder(s string) string {
 	return strings.ReplaceAll(s, "::", "/")
+}
+
+func ToChoices(s []string) []string {
+	quotedS := make([]string, len(s))
+	for i, v := range s {
+		quotedS[i] = fmt.Sprintf("\"%s\"", v)
+	}
+	return quotedS
 }

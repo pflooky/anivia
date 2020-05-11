@@ -1,5 +1,6 @@
-name: adimono
+name: forcg
 namespace: apps::account
+branches: "master"
 params:
   - name: APP_VER
     type: "choice" #type can be string|boolean|choice
@@ -7,7 +8,7 @@ params:
     description: "Version Tag for artifact"
     choices: ["v1.0", "v2.0"]
 repo:
-  path: projects/adimono.git
+  path: projects/forcg.git
 build:
   lang: java
   step:

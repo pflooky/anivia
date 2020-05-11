@@ -20,3 +20,18 @@ func TemplateGenerator(buildDir string, outputDir string) error {
 
 	return nil
 }
+
+func RunVxPipelineTemplates(buildDir string, outputDir string) error {
+	log.Println("Generating vx-pipeline template based on builds found in: " + buildDir)
+	buildSpecs, buildErr := task.GenerateBuildSpecs(buildDir)
+	if buildErr != nil {
+		return buildErr
+	}
+
+	err := templates.RunVxPipelineTemplates(&buildSpecs, outputDir)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

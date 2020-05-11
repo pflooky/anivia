@@ -20,6 +20,30 @@ func createDirSafely(fileName string) error {
 	return nil
 }
 
+func RunVxPipelineTemplates(specs *[]model.BuildSpec, outputDir string) error {
+	appWorkDir := fmt.Sprintf("%s\\vx-pipeline\\", outputDir)
+	log.Println(fmt.Sprintf("Generating vx-pipeline template for all apps inside of: %s", appWorkDir))
+	appDirErr := createDirSafely(appWorkDir)
+	if appDirErr != nil {
+		return appDirErr
+	}
+
+	tmpl, tmplErr := LoadVxPipelineTemplate()
+	if tmplErr != nil {
+		return tmplErr
+	}
+
+	file, fileErr := os.Create(fmt.Sprintf("%s\\%s", appWorkDir, tmpl.Name()))
+	if fileErr != nil {
+		return fileErr
+	}
+	exErr := tmpl.Execute(file, &specs)
+	if exErr != nil {
+		return exErr
+	}
+	return nil
+}
+
 func RunTemplates(buildSpecs *[]model.BuildSpec, outputDir string) error {
 	tmplArray := []string{"jenkins-build-job", "build-script"}
 
